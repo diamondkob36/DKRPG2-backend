@@ -22,15 +22,21 @@ type BaseStats struct {
 	INT   int `json:"int"`
 }
 
-// สเตตัสรอง (Secondary Stats)
+// สเตตัสรอง (Secondary Stats) ครบถ้วนตาม game-logic.js
 type SecStats struct {
-	Atk      int `json:"atk"`       // พลังโจมตี (Attack)
-	Matk     int `json:"matk"`      // พลังเวท (Magic Attack)
-	Def      int `json:"def"`       // พลังป้องกัน (Defense)
-	Acc      int `json:"acc"`       // ความแม่นยำ (Accuracy) - เริ่มต้น 5%
-	Eva      int `json:"eva"`       // อัตราหลบหลีก (Evasion) 
-	CritRate int `json:"crit_rate"` // โอกาสคริติคอล (Critical Rate) - เริ่มต้น 5% อิงจากไอเทมเท่านั้น
-}
+	Atk         int `json:"atk"`
+	Matk        int `json:"matk"`
+	Def         int `json:"def"`
+	Acc         int `json:"acc"`          // แม่นยำ (หักลบหลบหลีก)
+	Eva         int `json:"eva"`          // หลบหลีก (ในโค้ดเก่าใช้ชื่อ dodge)
+	Block       int `json:"block"`        // โอกาสบล็อก (%)
+	IgnoreBlock int `json:"ignore_block"` // เจาะเกราะ/ลดบล็อก (%)
+	CritRate    int `json:"crit_rate"`    // โอกาสคริติคอล (%)
+	CritDmg     int `json:"crit_dmg"`     // ความแรงคริติคอล (เริ่มต้น 150)
+	DmgRed      int `json:"dmg_red"`      // ลดความเสียหาย (สูงสุด 40%)
+	HpRegen     int `json:"hp_regen"`
+	MpRegen     int `json:"mp_regen"`
+}	
 
 // โครงสร้างของบัฟและดีบัฟ
 type Buff struct {
