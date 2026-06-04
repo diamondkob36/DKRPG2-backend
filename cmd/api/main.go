@@ -21,7 +21,7 @@ type CreateCharacterRequest struct {
 		STR int `json:"str" binding:"required"`
 		AGI int `json:"agi" binding:"required"`
 		INT int `json:"int" binding:"required"`
-		Def int `json:"def" binding:"required"`
+		Def int `json:"def"`  
 	} `json:"stats" binding:"required"`
 	CombatStats struct {
 		HpRegen     int `json:"hp_regen"`

@@ -22,23 +22,13 @@ func CalculateSecondaryStatsFromClient(base models.BaseStats, def, hpRegen, mpRe
 }
 
 // คำนวณ SecStats แบบพื้นฐาน (ใช้สำหรับคำนวณใหม่ระหว่างเล่นเกม เช่น เมื่อเพิ่มสเตตัส)
-func CalculateSecondaryStats(base models.BaseStats, activeBuffs []models.Buff) models.SecStats {
-	secStats := models.SecStats{
-		Atk:         base.STR * 2,
-		Matk:        base.INT * 2,
-		Def:         0,
-		Acc:         5,
-		Eva:         base.AGI / 4,
-		Block:       0,
-		IgnoreBlock: 0,
-		CritRate:    5,
-		CritDmg:     150,
-		DmgRed:      0,
-		HpRegen:     int(float64(base.MaxHP) * 0.05),
-		MpRegen:     int(float64(base.MaxMP) * 0.05),
-	}
+func CalculateSecondaryStats(base models.BaseStats, oldSecStats models.SecStats, activeBuffs []models.Buff) models.SecStats {
+	
+	secStats := oldSecStats
+	secStats.Atk = base.STR * 2
+	secStats.Matk = base.INT * 2
+	secStats.Eva = oldSecStats.Eva + (base.AGI / 4)
 
-	// คำนวณบัฟ
 	for _, buff := range activeBuffs {
 		switch buff.EffectType {
 		case "increase_atk":
