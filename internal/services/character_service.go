@@ -24,6 +24,16 @@ func CreateNewCharacterFromClient(username, classKey string, hp, mp, str, agi, i
 		startWeapon = "novice_dagger"
 	}
 
+	initialItem := models.ItemInstance{
+		UID:           "item-" + username + "-1", // สร้าง UID แบบง่ายๆ ไปก่อน (เช่น item-diamond-1)
+		ItemRefID:     startWeapon,               // รหัสไอเทม
+		Quantity:      1,                         // ได้ 1 ชิ้น
+		UpgradeLevel:  0,                         // ตีบวก +0
+		Durability:    50,                        // ความทนทานเริ่มต้น
+		MaxDurability: 50,                        // ความทนทานสูงสุด
+		SlotIndex:     0,                         // วางไว้ช่องแรกสุดของกระเป๋า
+	}
+
 	player := models.Player{
 		Username:   username,
 		ClassKey:   classKey,
@@ -36,10 +46,8 @@ func CreateNewCharacterFromClient(username, classKey string, hp, mp, str, agi, i
 		MaxWeight:  60,
 		BaseStats:  baseStats,
 		Equipment:  make(map[string]string),
-		Inventory: map[string]int{
-			"potion_s":  3,
-			startWeapon: 1,
-		},
+		Inventory:  []models.ItemInstance{initialItem},
+		
 		Skills:  make(map[string]int),
 		Loadout: make([]string, 6),
 		Buffs:   []models.Buff{},

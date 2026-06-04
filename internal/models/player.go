@@ -23,7 +23,7 @@ type Player struct {
 	BaseStats BaseStats         `json:"base_stats"`
 	SecStats  SecStats          `json:"secondary_stats"`
 	Equipment map[string]string `json:"equipment"`
-	Inventory map[string]int    `json:"inventory"`
+	Inventory []ItemInstance `json:"inventory"`
 
 	// ระบบสกิล
 	Skills  map[string]int `json:"skills"`
@@ -65,4 +65,14 @@ type Buff struct {
 	IsTurnBased bool      `json:"is_turn_based"`
 	Duration    int       `json:"duration"`
 	AppliedAt   time.Time `json:"applied_at"`
+}
+
+type ItemInstance struct {
+	UID           string `json:"uid"`
+	ItemRefID     string `json:"item_ref_id"`
+	Quantity      int    `json:"quantity"`
+	UpgradeLevel  int    `json:"upgrade_level"`
+	Durability    int    `json:"durability"`
+	MaxDurability int    `json:"max_durability"`
+	SlotIndex     int    `json:"slot_index"`
 }
