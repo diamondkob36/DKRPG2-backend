@@ -5,7 +5,9 @@ import "time"
 // ตัวละครผู้เล่น
 type Player struct {
 	ID         string            `json:"id"`
+	Email      string 			 `json:"email"`
 	Username   string            `json:"username"`
+	PasswordHash string 		 `json:"-"`
 	ClassKey   string            `json:"class_key"`
 	Level      int               `json:"level"`
 	Exp        int               `json:"exp"`
