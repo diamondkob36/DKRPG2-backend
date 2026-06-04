@@ -4,23 +4,28 @@ import "time"
 
 // ตัวละครผู้เล่น
 type Player struct {
-	ID         string            `json:"id"`
-	Username   string            `json:"username"`
-	ClassKey   string            `json:"class_key"`
-	Level      int               `json:"level"`
-	Exp        int               `json:"exp"`
-	MaxExp     int               `json:"max_exp"`
-	Gold       int               `json:"gold"`
-	StatPoints int               `json:"stat_points"`
+	ID           string            `json:"id"`
+	Email        string            `json:"email"`
+	Username     string            `json:"username"`
+	PasswordHash string            `json:"-"`
+	ClassKey     string            `json:"class_key"`
+	Level        int               `json:"level"`
+	Exp          int               `json:"exp"`
+	MaxExp       int               `json:"max_exp"`
+	Gold         int               `json:"gold"`
+	StatPoints   int               `json:"stat_points"`
 
+	// ระบบความจุ
 	MaxSlots  int `json:"max_slots"`
 	MaxWeight int `json:"max_weight"`
 
+	// สเตตัสและข้อมูลสวมใส่
 	BaseStats BaseStats         `json:"base_stats"`
 	SecStats  SecStats          `json:"secondary_stats"`
 	Equipment map[string]string `json:"equipment"`
 	Inventory map[string]int    `json:"inventory"`
 
+	// ระบบสกิล
 	Skills  map[string]int `json:"skills"`
 	Loadout []string       `json:"loadout"`
 

@@ -3,19 +3,23 @@ package main
 import (
 	"net/http"
 
-	"dkrpg2-backend/internal/repository"
+	"dkrpg2-backend/internal/repository" // <-- เพิ่มเข้ามา
 	"dkrpg2-backend/internal/services"
 
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type CreateCharacterRequest struct {
+	Email    string `json:"email" binding:"required,email"`
 	Username string `json:"username" binding:"required"`
+	Password string `json:"password" binding:"required,min=6"`
 	ClassKey string `json:"class_key" binding:"required"`
 }
 
 type LoginRequest struct {
-	Username string `json:"username" binding:"required"`
+	Identifier string `json:"identifier" binding:"required"`
+	Password   string `json:"password" binding:"required"`
 }
 
 func main() {
@@ -38,41 +42,51 @@ func main() {
 	r.POST("/api/character/create", func(c *gin.Context) {
 		var req CreateCharacterRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "ข้อมูลไม่ครบถ้วน หรือรูปแบบผิด"})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "ข้อมูลไม่ครบถ้วน หรือรูปแบบอีเมลผิด"})
+			return
+		}
+
+		// 🔒 เข้ารหัส Password ด้วย bcrypt (ความปลอดภัยระดับ 10)
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), 10)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "เกิดข้อผิดพลาดในการเข้ารหัสข้อมูล"})
 			return
 		}
 
 		newPlayer := services.CreateNewCharacter(req.Username, req.ClassKey)
+		newPlayer.Email = req.Email
+		newPlayer.PasswordHash = string(hashedPassword) // เก็บแค่ Hash เท่านั้น
 
 		if err := repository.CreatePlayer(&newPlayer); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "ไม่สามารถบันทึกข้อมูลตัวละครได้: " + err.Error()})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "ชื่อตัวละครหรืออีเมลนี้มีคนใช้แล้ว"})
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{
-			"message": "สร้างตัวละครสำเร็จ",
-			"data":    newPlayer,
-		})
+		c.JSON(http.StatusOK, gin.H{"message": "สร้างตัวละครสำเร็จ", "data": newPlayer})
 	})
 	
 	r.POST("/api/character/login", func(c *gin.Context) {
 		var req LoginRequest
-		
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "กรุณาส่งชื่อตัวละคร"})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "กรุณากรอกข้อมูลให้ครบถ้วน"})
 			return
 		}
 
-		player, err := repository.GetPlayerByUsername(req.Username)
+		// ค้นหาด้วย Email หรือ Username ก็ได้
+		player, err := repository.GetPlayerByIdentifier(req.Identifier)
 		if err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "ไม่พบตัวละครชื่อนี้ในระบบ!"})
+			c.JSON(http.StatusNotFound, gin.H{"error": "ไม่พบผู้ใช้งานนี้ในระบบ"})
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{
-			"message": "เข้าสู่ระบบสำเร็จ",
-			"data":    player,
-		})
+		// 🔓 ตรวจสอบรหัสผ่านว่าตรงกับ Hash ในระบบหรือไม่
+		err = bcrypt.CompareHashAndPassword([]byte(player.PasswordHash), []byte(req.Password))
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "รหัสผ่านไม่ถูกต้อง!"})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"message": "เข้าสู่ระบบสำเร็จ", "data": player})
 	})
 
 	r.Run(":8080")
