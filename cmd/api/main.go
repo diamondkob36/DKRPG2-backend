@@ -15,6 +15,25 @@ type CreateCharacterRequest struct {
 	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required,min=6"`
 	ClassKey string `json:"class_key" binding:"required"`
+	Stats    struct {
+		HP  int `json:"hp" binding:"required"`
+		MP  int `json:"mp" binding:"required"`
+		STR int `json:"str" binding:"required"`
+		AGI int `json:"agi" binding:"required"`
+		INT int `json:"int" binding:"required"`
+		Def int `json:"def" binding:"required"`
+	} `json:"stats" binding:"required"`
+	CombatStats struct {
+		HpRegen     int `json:"hp_regen"`
+		MpRegen     int `json:"mp_regen"`
+		Acc         int `json:"acc"`
+		Block       int `json:"block"`
+		DmgRed      int `json:"dmg_red"`
+		CritRate    int `json:"crit_rate"`
+		CritDmg     int `json:"crit_dmg"`
+		Dodge       int `json:"dodge"`
+		IgnoreBlock int `json:"ignore_block"`
+	} `json:"combat_stats" binding:"required"`
 }
 
 type LoginRequest struct {
@@ -46,16 +65,35 @@ func main() {
 			return
 		}
 
-		// 🔒 เข้ารหัส Password ด้วย bcrypt (ความปลอดภัยระดับ 10)
+		// 🔒 เข้ารหัส Password
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), 10)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "เกิดข้อผิดพลาดในการเข้ารหัสข้อมูล"})
 			return
 		}
 
-		newPlayer := services.CreateNewCharacter(req.Username, req.ClassKey)
+		// ✅ ใช้ค่าจาก Frontend โดยตรง (รวม Combat Stats)
+		newPlayer := services.CreateNewCharacterFromClient(
+			req.Username,
+			req.ClassKey,
+			req.Stats.HP,
+			req.Stats.MP,
+			req.Stats.STR,
+			req.Stats.AGI,
+			req.Stats.INT,
+			req.Stats.Def,
+			req.CombatStats.HpRegen,
+			req.CombatStats.MpRegen,
+			req.CombatStats.Acc,
+			req.CombatStats.Block,
+			req.CombatStats.DmgRed,
+			req.CombatStats.CritRate,
+			req.CombatStats.CritDmg,
+			req.CombatStats.Dodge,
+			req.CombatStats.IgnoreBlock,
+		)
 		newPlayer.Email = req.Email
-		newPlayer.PasswordHash = string(hashedPassword) // เก็บแค่ Hash เท่านั้น
+		newPlayer.PasswordHash = string(hashedPassword)
 
 		if err := repository.CreatePlayer(&newPlayer); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "ชื่อตัวละครหรืออีเมลนี้มีคนใช้แล้ว"})
